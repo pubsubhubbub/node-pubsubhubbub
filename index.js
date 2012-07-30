@@ -27,7 +27,7 @@ utillib.inherits(PubSubHubbub, Stream);
 
 PubSubHubbub.prototype.serverHandler = function(req, res){
     console.log(req.url, this.callbackPath)
-    if(req.url != this.callbackPath){
+    if(req.url.substr(0, this.callbackPath.length) != this.callbackPath){
         res.writeHead(404, {"Content-Type": "text/html"});
         res.end("<!DOCTYPE html><html><head><meta charset=\"utf-8\"/><title>404 Not Found</title></head><body><h1>404 Not Found</h1></body></html>");
         return;
