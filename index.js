@@ -148,7 +148,7 @@ PubSubHubbub.prototype.serverPOSTHandler = function(req, res){
 
 }
 
-PubSubHubbub.prototype.parseFeed(xml){
+PubSubHubbub.prototype.parseFeed = function(xml){
     var feed = new NodePie(xml);
     
     try{
