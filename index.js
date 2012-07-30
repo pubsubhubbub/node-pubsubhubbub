@@ -100,7 +100,7 @@ PubSubHubbub.prototype.pubsubResponse = function(topic, callback, error, respons
 }
 
 PubSubHubbub.prototype.serverGETHandler = function(req, res){
-    var params = urllib.parse(request.url, true, true);
+    var params = urllib.parse(req.url, true, true);
     
     console.log(params);
     console.log(this.token);
