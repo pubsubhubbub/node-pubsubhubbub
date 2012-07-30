@@ -46,7 +46,7 @@ PubSubHubbub.prototype.serverHandler = function(req, res){
 
 PubSubHubbub.prototype.onServerError = function(error){
     if(error.syscall == "listen"){
-        process.stderr.write("Failed to start listening on port " + config.port + " ("+error.code+")\n");
+        process.stderr.write("Failed to start listening on port " + this.port + " ("+error.code+")\n");
         process.exit(1);
     }
 
@@ -70,9 +70,9 @@ PubSubHubbub.prototype.setSubscription = function(mode, topic, hub, callback){
     var form = {
             "hub.mode": mode || "subscribe",
             "hub.verify": "sync",
-            "hub.callback": config.callbackServer + config.callbackPath,
+            "hub.callback": this.callbackServer + this.callbackPath,
             "hub.topic": topic,
-            "hub.verify_token": config.token
+            "hub.verify_token": this.token
         },
         postParams = {
             url: hub,
