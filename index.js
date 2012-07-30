@@ -26,6 +26,7 @@ function PubSubHubbub(options){
 utillib.inherits(PubSubHubbub, Stream);
 
 PubSubHubbub.prototype.serverHandler = function(req, res){
+    console.log(req.url, this.callbackPath)
     if(req.url != this.callbackPath){
         res.writeHead(404, {"Content-Type": "text/html"});
         res.end("<!DOCTYPE html><html><head><meta charset=\"utf-8\"/><title>404 Not Found</title></head><body><h1>404 Not Found</h1></body></html>");
@@ -40,6 +41,7 @@ PubSubHubbub.prototype.serverHandler = function(req, res){
         return this.serverPOSTHandler(req, res);
     }
 
+console.log(777);
     res.writeHead(500, {"Content-Type": "text/html"});
     res.end("<!DOCTYPE html><html><head><meta charset=\"utf-8\"/><title>500 Internal Server Error</title></head><body><h1>500 Internal Server Error</h1></body></html>");
 }
@@ -80,10 +82,12 @@ PubSubHubbub.prototype.setSubscription = function(mode, topic, hub, callback){
             encoding: "utf-8"
         };
 
+console.log(postParams);
     request.post(postParams, this.pubsubResponse.bind(this, topic, callback));
 }
 
 PubSubHubbub.prototype.pubsubResponse = function(topic, callback, error, response, body){
+    console.log(arguments);
     if(error){
         return callback(error);
     }
@@ -98,6 +102,9 @@ PubSubHubbub.prototype.pubsubResponse = function(topic, callback, error, respons
 PubSubHubbub.prototype.serverGETHandler = function(req, res){
     var params = urllib.parse(request.url, true, true);
     
+    console.log(params);
+    console.log(this.token);
+
     if(params.query['hub.verify_token'] != this.token){
         res.writeHead(500, {"Content-Type": "text/html"});
         res.end("<!DOCTYPE html><html><head><meta charset=\"utf-8\"/><title>500 Internal Server Error</title></head><body><h1>500 Internal Server Error</h1></body></html>");
@@ -112,6 +119,7 @@ PubSubHubbub.prototype.serverGETHandler = function(req, res){
             topic: params.query["hub.topic"]
         };
 
+        console.log(1);
     this.emit(params.query["hub.mode"] || "subscribe", data);
 }
 
