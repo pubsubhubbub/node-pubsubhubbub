@@ -167,4 +167,10 @@ pubsub.on("unsubscribe", console.log.bind(console, "UNSUBSCRIBE"));
 pubsub.on("error", console.log.bind(console, "ERROR"));
 pubsub.on("feed", console.log.bind(console, "FEED"));
 
+setTimeout(function(){
+    pubsub.setSubscription("subscribe", "http://minutest3.blogspot.com/", "http://pubsubhubbub.appspot.com/", console.log.bind(console, "REQUEST1"));
+}, 1500);
 
+setTimeout(function(){
+    pubsub.setSubscription("unsubscribe", "http://minutest3.blogspot.com/", "http://pubsubhubbub.appspot.com/", console.log.bind(console, "REQUEST2"));
+}, 13500);
