@@ -6,6 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "homepage": "http://github.com/andris9/resolver",
   "author": "Andris Reinman",
   "license": "MIT",
   "dependencies": {
