@@ -1,12 +1,12 @@
 {
   "name": "pubsubhubbub",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "PubSubHubbub subscriber",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "homepage": "http://github.com/andris9/resolver",
+  "homepage": "http://github.com/andris9/pubsubhubbub",
   "author": "Andris Reinman",
   "license": "MIT",
   "dependencies": {

@@ -5,8 +5,22 @@ var request = require("request"),
     utillib = require("util"),
     NodePie = require("nodepie");
 
+// Expose to the world
 module.exports.PubSubHubbub = PubSubHubbub;
 
+/**
+ * Create a PubSubHubbub client handler object. HTTP server is set up to listen 
+ * the responses from the hubs.
+ *
+ * @constructor
+ * @param {Object} options Options object to set up the handler
+ * @param {String} options.callbackServer Hostname the hubs can send the response, include also the port number if not behind proxy
+ * @param {Number} [options.callbackPath="/hubbub"] Path to listen for (other paths return 404)
+ * @param {String} [options.token] Secret token for the hub to authenticate itself, not used if not set 
+ * @param {Number} [options.maxRSSSize=3MB] Maximum file size in bytes for an incoming RSS file - if longer, it will be trimmed
+ * @param {String} [options.gid] If started as root, downgrade to selected group ID
+ * @param {String} [options.giu] If started as root, downgrade to selected user ID
+ */
 function PubSubHubbub(options){
     Stream.call(this);
 
@@ -15,7 +29,7 @@ function PubSubHubbub(options){
     this.port = options.port || 8921;
     this.callbackServer = options.callbackServer;
     this.callbackPath = options.callbackPath || "/hubbub";
-    this.token = options.token || "FjMMzUBRFmDWCCyqBRMk";
+    this.token = options.token || false;
     this.maxRSSSize = options.maxRSSSize || 3 * 1024 * 1024;
     this.gid = options.gid;
     this.uid = options.uid;
@@ -84,14 +98,18 @@ PubSubHubbub.prototype.setSubscription = function(mode, topic, hub, callback){
             "hub.mode": mode || "subscribe",
             "hub.verify": "sync",
             "hub.callback": this.callbackServer + this.callbackPath,
-            "hub.topic": topic,
-            "hub.verify_token": this.token
+            "hub.topic": topic
         },
         postParams = {
             url: hub,
             form: form,
             encoding: "utf-8"
         };
+
+    if(this.token){
+        form["hub.verify_token"] = this.token;
+    }
+
     request.post(postParams, this.pubsubResponse.bind(this, topic, callback));
 }
 
@@ -110,7 +128,7 @@ PubSubHubbub.prototype.pubsubResponse = function(topic, callback, error, respons
 PubSubHubbub.prototype.serverGETHandler = function(req, res){
     var params = urllib.parse(req.url, true, true);
 
-    if(params.query['hub.verify_token'] != this.token || !params.query["hub.topic"]){
+    if(this.token && (params.query['hub.verify_token'] != this.token || !params.query["hub.topic"])){
         res.writeHead(500, {"Content-Type": "text/html"});
         res.end("<!DOCTYPE html><html><head><meta charset=\"utf-8\"/><title>500 Internal Server Error</title></head><body><h1>500 Internal Server Error</h1></body></html>");
         return;
