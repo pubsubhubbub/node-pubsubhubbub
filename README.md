@@ -1,6 +1,8 @@
 # README.md
 
-PubSubHubbub subscriber module
+PubSubHubbub subscriber module. Supports both 0.3 and 0.4 hubs.
+
+**NB** Do not upgrade from v0.1.x - the API is totally different
 
 ## Install
 
@@ -10,20 +12,20 @@ Install with npm
 
 ## Usage
 
-**pubsubhubbub** starts a dedicated HTTP server on selected port (default is 8921). When
-subscribing to a feed, the webserver address will be used as the callback URL
+**pubsubhubbub** starts a HTTP server on selected port. 
 
-    var PubSubHubbub = require("pubsubhubbub").PubSubHubbub;
+    var pubSubHubbub = require("pubsubhubbub");
 
-    var pubSubSubscriber = new PubSubHubbub(options);
+    var pubSubSubscriber = pubSubHubbub.createServer(options);
+
+    pubSubSubscriber.listen(1337);
 
 Where options includes the following properties
 
   * **port** - port to listen
-  * **callbackServer** - Server url, the PubSubHubbub client can be reaced by, eg. "http://mypubsubsserver.com:8921"
-  * **token** - secret token for verifying the subscription requests
-  * **uid** - *optional* user id to change after http server has been set up (eg. if you're starting the server as root on port 80 and want to change the user to "nobody" etc.)
-  * **gid** - *optional* group id to change after http server has been set up
+  * **callbackUrl** Callback URL for the hub
+  * **secret** (optional) Secret value for HMAC signatures
+  * **maxContentSize** (optional) Maximum allowed size of the POST messages
 
 ## Events
 
@@ -31,64 +33,93 @@ Where options includes the following properties
   * **'error'** (*err*) - An error has occurred
   * **'subscribe'** (*data*) - Subscription for a feed has been updated
   * **'unsubscribe'** (*data*) - Subscription for a feed has been cancelled
-  * **'feed'** (*feed*) - Incoming notification as a NodePie feed object
+  * **'denied'** (*data*) - Subscription has been denied
+  * **'feed'** (*data*) - Incoming notification
 
 ## API
+
+### Listen
+
+Start listening on selected port
+
+    pubSubSubscriber.listen(port)
+
+Where
+
+  * **port** is the HTTP port to listen
 
 ### Subscribe
 
 Subscribe to a feed with 
 
-    pubsub.subscribe(topic, hub, callback)
+    pubSubSubscriber.subscribe(topic, hub, callback)
 
 Where
 
   * **topic** is the URL of the RSS/ATOM feed to subscribe to
   * **hub** is the hub for the feed
-  * **callback** is the callback function with an error object if the subscription failed
+  * **callback** (optional) is the callback function with an error object if the subscription failed
 
 Example:
 
-    var pubSubSubscriber = new PubSubHubbub(options),
+    var pubSubSubscriber = pubSubHubbub.createServer(options),
         topic = "http://testetstetss.blogspot.com/feeds/posts/default",
         hub = "http://pubsubhubbub.appspot.com/";
 
-    pubSubSubscriber.subscribe(topic, hub, function(err){
-        if(err){
-            console.log("Subscribing failed");
-        }else{
-            console.log("Subscribed!");
-        }
+    pubSubSubscriber.on("subscribe", function(data){
+        console.log(data.topic + " subscribed");
     });
 
-You should also listen to the 'subscribe' event since the hub will resubmit the
-data when the lease expires and a new lease time is provided.
+    pubSubSubscriber.listen(port);
+
+    pubsub.on("listen", function(){
+        pubSubSubscriber.subscribe(topic, hub, function(err){
+            if(err){
+                console.log("Failed subscribing");
+            }
+        });
+    });
 
 ### Unsubscribe
 
 Unsubscribe from a feed with 
 
-    pubsub.unsubscribe(topic, hub, callback)
+    pubSubSubscriber.unsubscribe(topic, hub, callback)
 
 Where
 
   * **topic** is the URL of the RSS/ATOM feed to unsubscribe from
   * **hub** is the hub for the feed
-  * **callback** is the callback function with an error object if the unsubscribing failed
+  * **callback** (optional) is the callback function with an error object if the unsubscribing failed
 
 Example:
 
-    var pubSubSubscriber = new PubSubHubbub(options),
+    var pubSubSubscriber = pubSubHubbub.createServer(options),
         topic = "http://testetstetss.blogspot.com/feeds/posts/default",
         hub = "http://pubsubhubbub.appspot.com/";
 
-    pubSubSubscriber.unsubscribe(topic, hub, function(err){
-        if(err){
-            console.log("Unsubscribing failed");
-        }else{
-            console.log("Unsubscribed!");
-        }
+    pubSubSubscriber.on("unsubscribe", function(data){
+        console.log(data.topic + " unsubscribed");
     });
+
+    pubSubSubscriber.listen(port);
+
+    pubsub.on("listen", function(){
+        pubSubSubscriber.unsubscribe(topic, hub, function(err){
+            if(err){
+                console.log("Failed unsubscribing");
+            }
+        });
+    });
+
+## Notifications
+
+Update notifications can be checked with the `'feed'` event. The data object is with the following structure:
+
+  * **topic** - Topic URL
+  * **hub** - Hub URL, might be undefined
+  * **callback** - Callback URL that was used by the Hub
+  * **feed** - Feed XML as a Buffer object
 
 ## License
 

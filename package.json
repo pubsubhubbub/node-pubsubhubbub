@@ -1,6 +1,6 @@
 {
   "name": "pubsubhubbub",
-  "version": "0.1.1",
+  "version": "0.2.1",
   "description": "PubSubHubbub subscriber",
   "main": "index.js",
   "scripts": {
@@ -10,7 +10,6 @@
   "author": "Andris Reinman",
   "license": "MIT",
   "dependencies": {
-    "request": "*",
-    "nodepie": "*"
+    "request": "*"
   }
 }
