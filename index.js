@@ -104,7 +104,8 @@ PubSubHubbub.prototype.setSubscription = function(mode, topic, hub, callbackUrl,
     callbackUrl = callbackUrl || this.callbackUrl + 
         (this.callbackUrl.replace(/^https?:\/\//i, "").match(/\//)?"":"/") +
         (this.callbackUrl.match(/\?/)?"&":"?") +
-        "topic="+encodeURIComponent(topic);
+        "topic="+encodeURIComponent(topic)+
+        "&hub="+encodeURIComponent(hub);
 
     var form = {
             "hub.callback": callbackUrl,
@@ -209,7 +210,7 @@ PubSubHubbub.prototype._onGetRequest = function(req, res){
     switch(params.query['hub.mode']){
         case "denied":
             res.writeHead(200, {'Content-Type': 'text/plain'});
-            data = {topic: params.query["hub.topic"]};
+            data = {topic: params.query["hub.topic"], hub: params.query.hub};
             res.end(params.query['hub.challenge'] || "ok");
             break;
         case "subscribe":
@@ -218,7 +219,8 @@ PubSubHubbub.prototype._onGetRequest = function(req, res){
             res.end(params.query['hub.challenge']);
             data = {
                 lease: Number(params.query["hub.lease_seconds"] || 0) + Math.round(Date.now()/1000),
-                topic: params.query["hub.topic"]
+                topic: params.query["hub.topic"],
+                hub: params.query.hub
             };
             break;
         default:
@@ -241,7 +243,7 @@ PubSubHubbub.prototype._onPostRequest = function(req, res){
     var bodyChunks = [],
         params = urllib.parse(req.url, true, true),
         topic = params && params.query && params.query.topic,
-        hub,
+        hub = params && params.query && params.query.hub,
         bodyLen = 0,
         tooLarge = false,
         signatureParts, algo, signature, hmac;
