@@ -225,7 +225,7 @@ PubSubHubbub.prototype._onGetRequest = function(req, res){
             break;
         default:
             // Not a valid mode
-            return res._sendError(req, res, 403, "Forbidden");
+            return this._sendError(req, res, 403, "Forbidden");
     }
 
     // Emit subscription information
@@ -277,7 +277,7 @@ PubSubHubbub.prototype._onPostRequest = function(req, res){
         try{
             hmac = crypto.createHmac(algo, crypto.createHmac("sha1", this.secret).update(topic).digest("hex"));
         }catch(E){
-            return res._sendError(req, res, 403, "Forbidden");
+            return this._sendError(req, res, 403, "Forbidden");
         }
     }
 
@@ -305,7 +305,7 @@ PubSubHubbub.prototype._onPostRequest = function(req, res){
         }
 
         if(this.secret && hmac.digest("hex").toLowerCase() != signature){
-            return res._sendError(req, res, 403, "Forbidden");
+            return this._sendError(req, res, 403, "Forbidden");
         }
 
         res.writeHead(204, {'Content-Type': 'text/plain; charset=utf-8'});
