@@ -26,6 +26,8 @@ Where options includes the following properties
   * **callbackUrl** Callback URL for the hub
   * **secret** (optional) Secret value for HMAC signatures
   * **maxContentSize** (optional) Maximum allowed size of the POST messages
+  * **username** (optional) Username for HTTP Authentication
+  * **password** (optional) Password for HTTP Authentication
 
 ## Events
 
