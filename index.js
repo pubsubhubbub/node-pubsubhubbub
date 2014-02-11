@@ -262,7 +262,7 @@ PubSubHubbub.prototype._onPostRequest = function(req, res){
         tooLarge = false,
         signatureParts, algo, signature, hmac;
 
-    // v0.4 hubs have a linke header that includes both the topic url and hub url
+    // v0.4 hubs have a link header that includes both the topic url and hub url
     (req.headers && req.headers.link || "").
       replace(/<([^>]+)>\s*(?:;\s*rel=['"]([^'"]+)['"])?/gi, function(o, url, rel){
         switch((rel || "").toLowerCase()){
@@ -329,7 +329,8 @@ PubSubHubbub.prototype._onPostRequest = function(req, res){
             topic: topic, 
             hub: hub,
             callback: "http://" + req.headers.host + req.url,
-            feed: Buffer.concat(bodyChunks, bodyLen)
+            feed: Buffer.concat(bodyChunks, bodyLen),
+            headers: req.headers
         });
 
     }).bind(this));

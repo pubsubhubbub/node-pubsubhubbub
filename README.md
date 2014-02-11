@@ -122,6 +122,7 @@ Update notifications can be checked with the `'feed'` event. The data object is 
   * **hub** - Hub URL, might be undefined
   * **callback** - Callback URL that was used by the Hub
   * **feed** - Feed XML as a Buffer object
+  * **headers** - Request headers object
 
 ## License
 
