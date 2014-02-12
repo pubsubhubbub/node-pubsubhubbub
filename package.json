@@ -4,12 +4,14 @@
   "description": "PubSubHubbub subscriber",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "make test"
   },
-  "homepage": "http://github.com/andris9/pubsubhubbub",
+  "homepage": "http://github.com/DBeath/pubsubhubbub",
   "author": "Andris Reinman",
   "license": "MIT",
   "dependencies": {
-    "request": "*"
+    "request": "*",
+    "mocha": "*",
+    "chai": "*"
   }
 }
