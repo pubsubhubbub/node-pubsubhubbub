@@ -6,11 +6,17 @@
   "scripts": {
     "test": "make test"
   },
-  "homepage": "http://github.com/DBeath/pubsubhubbub",
+  "homepage": "http://github.com/andris9/pubsubhubbub",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/andris9/pubsubhubbub"
+  },
   "author": "Andris Reinman",
   "license": "MIT",
   "dependencies": {
-    "request": "*",
+    "request": "*"
+  },
+  "devDependencies": {
     "mocha": "*",
     "chai": "*"
   }
