@@ -1,5 +1,23 @@
 var expect = require('chai').expect,
+	http = require('http'),
 	pubSubHubbub = require("../index");
+
+var pubsub = pubSubHubbub.createServer({
+		callbackUrl: "http://kreata.ee:1337",
+        secret: "MyTopSecret",
+        username: "Test",
+        password: "P@ssw0rd"
+	});
+
+describe('pubsubhubbub', function() {
+	before(function() {
+		pubsub.listen(8000);
+	});
+
+	after(function() {
+		pubsub.close();
+	});
+});
 
 suite("Pubsubhubbub tests", function() {
 	var pubsub = pubSubHubbub.createServer({
@@ -31,3 +49,4 @@ suite("Pubsubhubbub tests", function() {
 	});
 
 });
+
