@@ -12,8 +12,8 @@ var request = require("request"),
  *     pubsub = createServer(options);
  *     pubsub.listen(1337);
  *
- * @param {Object} options Options object
- * @param {String} options.callbackUrl Callback URL for the hub
+ * @param {Object} [options] Options object
+ * @param {String} [options.callbackUrl] Callback URL for the hub
  * @param {String} [options.secret] Secret value for HMAC signatures
  * @param {Number} [options.maxContentSize] Maximum allowed size of the POST messages
  * @return {Object} A PubSubHubbub server object
@@ -27,10 +27,12 @@ module.exports.createServer = function(options){
  * the responses from the hubs.
  *
  * @constructor
- * @param {Object} options Options object
- * @param {String} options.callbackUrl Callback URL for the hub
+ * @param {Object} [options] Options object
+ * @param {String} [options.callbackUrl] Callback URL for the hub
  * @param {String} [options.secret] Secret value for HMAC signatures
- * @param {Number} [options.maxContentSize] Maximum allowed size of the POST messages 
+ * @param {Number} [options.maxContentSize] Maximum allowed size of the POST messages
+ * @param {String} [options.username] Username for HTTP Authentication
+ * @param {String} [options.password] Password for HTTP Authentication
  */
 function PubSubHubbub(options){
     Stream.call(this);
@@ -39,7 +41,15 @@ function PubSubHubbub(options){
 
     this.secret = options.secret || false;
     this.callbackUrl = options.callbackUrl;
-    this.maxContentSize = options.maxContentSize || 3 * 1024 * 1024;    
+    this.maxContentSize = options.maxContentSize || 3 * 1024 * 1024;
+
+    if (options.username) {
+        this.auth = {
+            'user': options.username,
+            'pass': options.password,
+            'sendImmediately': false
+        }
+    }    
 }
 utillib.inherits(PubSubHubbub, Stream);
 
@@ -119,6 +129,10 @@ PubSubHubbub.prototype.setSubscription = function(mode, topic, hub, callbackUrl,
             form: form,
             encoding: "utf-8"
         };
+
+    if (this.auth) {
+        postParams.auth = this.auth;
+    }
 
     if(this.secret){
         // do not use the original secret but a generated one
@@ -248,7 +262,7 @@ PubSubHubbub.prototype._onPostRequest = function(req, res){
         tooLarge = false,
         signatureParts, algo, signature, hmac;
 
-    // v0.4 hubs have a linke header that includes both the topic url and hub url
+    // v0.4 hubs have a link header that includes both the topic url and hub url
     (req.headers && req.headers.link || "").
       replace(/<([^>]+)>\s*(?:;\s*rel=['"]([^'"]+)['"])?/gi, function(o, url, rel){
         switch((rel || "").toLowerCase()){
@@ -315,7 +329,8 @@ PubSubHubbub.prototype._onPostRequest = function(req, res){
             topic: topic, 
             hub: hub,
             callback: "http://" + req.headers.host + req.url,
-            feed: Buffer.concat(bodyChunks, bodyLen)
+            feed: Buffer.concat(bodyChunks, bodyLen),
+            headers: req.headers
         });
 
     }).bind(this));

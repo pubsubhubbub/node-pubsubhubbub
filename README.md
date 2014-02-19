@@ -26,6 +26,8 @@ Where options includes the following properties
   * **callbackUrl** Callback URL for the hub
   * **secret** (optional) Secret value for HMAC signatures
   * **maxContentSize** (optional) Maximum allowed size of the POST messages
+  * **username** (optional) Username for HTTP Authentication
+  * **password** (optional) Password for HTTP Authentication
 
 ## Events
 
@@ -120,6 +122,7 @@ Update notifications can be checked with the `'feed'` event. The data object is 
   * **hub** - Hub URL, might be undefined
   * **callback** - Callback URL that was used by the Hub
   * **feed** - Feed XML as a Buffer object
+  * **headers** - Request headers object
 
 ## License
 
