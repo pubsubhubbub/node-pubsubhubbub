@@ -22,7 +22,7 @@ var notification = function(){
 			'X-Hub-Signature': encrypted_secret,
 			'X-PubSubHubbub-Callback': 'http://localhost:8000/callback',
 			'hub.topic': 'http://test.com',
-			'link': 'rel=hub"http://localhost/hub";rel=self"http://test.com"'
+			'link': '<http://test.com>; rel="self", <http://pubsubhubbub.appspot.com/>; rel="hub" ',
 		}
 	}
 	return request.post(options);
@@ -36,6 +36,7 @@ describe('pubsubhubbub', function() {
 	it('should see post', function(done){
 		request.post(notification(), function(err, res, body){
 			expect(res.statusCode).to.equal(200);
+			
 		});
 	});
 
