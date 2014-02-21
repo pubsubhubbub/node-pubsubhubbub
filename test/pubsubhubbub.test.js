@@ -2,7 +2,6 @@ var expect = require('chai').expect,
 	http = require('http'),
 	request = require('request'),
 	crypto = require('crypto'),
-	supertest = require('supertest'),
 	pubSubHubbub = require("../index");
 
 var pubsub = pubSubHubbub.createServer({
