@@ -14,47 +14,74 @@ var pubsub = pubSubHubbub.createServer({
 var topic = 'http://test.com/feed',
 	encrypted_secret = crypto.createHmac("sha1", pubsub.secret).update(topic).digest("hex");
 
-var notification = function(){
+var notification = function (){
 	var options = {
 		url: 'http://localhost:8000',
 		headers: {
-			'X-Hub-Signature': encrypted_secret,
+			'X-Hub-Signature': 'sha1='+encrypted_secret,
 			'X-PubSubHubbub-Callback': 'http://localhost:8000/callback',
 			'hub.topic': 'http://test.com',
-			'link': '<http://test.com>; rel="self", <http://pubsubhubbub.appspot.com/>; rel="hub" ',
+			'link': '<http://test.com>; rel="self", <http://pubsubhubbub.appspot.com/>; rel="hub"',
 		}
 	}
 	return request.post(options);
 }
 
-describe('pubsubhubbub', function() {
-	before(function() {
+describe('pubsubhubbub notification', function () {
+	before(function () {
 		pubsub.listen(8000);
 	});
 
-	it('should see post', function(done){
-		request.post(notification(), function(err, res, body){
-			expect(res.statusCode).to.equal(200);
-			
+	it('should fail with 403 - no X-Hub-Signature', function (done){
+		var options = {
+			url: 'http://localhost:8000',
+			headers: {
+				'link': '<http://test.com>; rel="self", <http://pubsubhubbub.appspot.com/>; rel="hub"',
+			}
+		}
+		request.post(options, function (err, res, body) {
+			try{
+				expect(res.statusCode).to.equal(403);
+				done();	
+			} catch (err) {
+				done(err);
+			}	
 		});
 	});
 
-	after(function() {
+	it('should fail with 400 - no topic', function (done) {
+		var options = {
+			url: 'http://localhost:8000',
+			headers: {
+				'link': '<http://pubsubhubbub.appspot.com/>; rel="hub"'
+			}
+		}
+		request.post(options, function (err, res, body) {
+			try {
+				expect(res.statusCode).to.equal(400);
+				done();
+			} catch (err) {
+				done(err);
+			}
+		});
+	});
+
+	after(function () {
 		pubsub.server.close();
 	});
 });
 
-suite("Pubsubhubbub tests", function() {
-	test("pubsub should exist", function() {
+suite("Pubsubhubbub tests", function () {
+	test("pubsub should exist", function () {
 		expect(pubsub).to.exist;
 	});
 
-	test("options passed correctly", function() {
+	test("options passed correctly", function () {
 		expect(pubsub.callbackUrl).to.equal("http://localhost:8000/callback");
 		expect(pubsub.secret).to.equal("MyTopSecret");
 	});
 
-	test("create authentication object", function() {
+	test("create authentication object", function () {
 		expect(pubsub.auth).to.exist;
 		expect(pubsub.auth.user).to.equal("Test");
 		expect(pubsub.auth.pass).to.equal("P@ssw0rd");
