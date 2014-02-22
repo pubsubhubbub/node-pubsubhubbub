@@ -11,7 +11,7 @@ var pubsub = pubSubHubbub.createServer({
         password: "P@ssw0rd"
 	});
 
-var topic = 'http://test.com/feed',
+var topic = 'http://test.com',
 	encrypted_secret = crypto.createHmac("sha1", pubsub.secret).update(topic).digest("hex");
 
 var notification = function (){
@@ -59,6 +59,24 @@ describe('pubsubhubbub notification', function () {
 		request.post(options, function (err, res, body) {
 			try {
 				expect(res.statusCode).to.equal(400);
+				done();
+			} catch (err) {
+				done(err);
+			}
+		});
+	});
+
+	it('should pass with 204', function (done) {
+		var options = {
+			url: 'http://localhost:8000',
+			headers: {
+				'X-Hub-Signature': 'sha1='+encrypted_secret,
+				'link': '<http://test.com>; rel="self", <http://pubsubhubbub.appspot.com/>; rel="hub"',
+			}
+		}
+		request.post(options, function (err, res, body) {
+			try {
+				expect(res.statusCode).to.equal(204);
 				done();
 			} catch (err) {
 				done(err);
