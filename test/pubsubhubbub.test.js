@@ -12,13 +12,15 @@ var pubsub = pubSubHubbub.createServer({
 	});
 
 var topic = 'http://test.com',
+	response_body = "This is a response.",
 	encrypted_secret = crypto.createHmac("sha1", pubsub.secret).update(topic).digest("hex");
+	hub_encryption = crypto.createHmac('sha1', encrypted_secret).update(response_body).digest('hex');
 
 var notification = function (){
 	var options = {
 		url: 'http://localhost:8000',
 		headers: {
-			'X-Hub-Signature': 'sha1='+encrypted_secret,
+			'X-Hub-Signature': 'sha1='+hub_encryption,
 			'X-PubSubHubbub-Callback': 'http://localhost:8000/callback',
 			'hub.topic': 'http://test.com',
 			'link': '<http://test.com>; rel="self", <http://pubsubhubbub.appspot.com/>; rel="hub"',
@@ -70,9 +72,10 @@ describe('pubsubhubbub notification', function () {
 		var options = {
 			url: 'http://localhost:8000',
 			headers: {
-				'X-Hub-Signature': 'sha1='+encrypted_secret,
+				'X-Hub-Signature': 'sha1='+hub_encryption,
 				'link': '<http://test.com>; rel="self", <http://pubsubhubbub.appspot.com/>; rel="hub"',
-			}
+			},
+			body: response_body
 		}
 		request.post(options, function (err, res, body) {
 			try {
