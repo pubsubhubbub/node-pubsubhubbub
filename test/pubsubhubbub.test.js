@@ -34,7 +34,7 @@ describe('pubsubhubbub notification', function () {
 		pubsub.listen(8000);
 	});
 
-	it('should fail with 403 - no X-Hub-Signature', function (done){
+	it('should return 403 - no X-Hub-Signature', function (done){
 		var options = {
 			url: 'http://localhost:8000',
 			headers: {
@@ -51,7 +51,7 @@ describe('pubsubhubbub notification', function () {
 		});
 	});
 
-	it('should fail with 400 - no topic', function (done) {
+	it('should return 400 - no topic', function (done) {
 		var options = {
 			url: 'http://localhost:8000',
 			headers: {
@@ -68,7 +68,7 @@ describe('pubsubhubbub notification', function () {
 		});
 	});
 
-	it('should pass with 204', function (done) {
+	it('should return 204', function (done) {
 		var options = {
 			url: 'http://localhost:8000',
 			headers: {
