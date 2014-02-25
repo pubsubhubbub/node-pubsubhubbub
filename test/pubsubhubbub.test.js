@@ -42,12 +42,8 @@ describe('pubsubhubbub notification', function () {
 			}
 		}
 		request.post(options, function (err, res, body) {
-			try {
-				expect(res.statusCode).to.equal(400);
-				done();
-			} catch (err) {
-				done(err);
-			}
+			expect(res.statusCode).to.equal(400);
+			done();
 		});
 	});
 
@@ -59,12 +55,8 @@ describe('pubsubhubbub notification', function () {
 			}
 		}
 		request.post(options, function (err, res, body) {
-			try{
-				expect(res.statusCode).to.equal(403);
-				done();	
-			} catch (err) {
-				done(err);
-			}	
+			expect(res.statusCode).to.equal(403);
+			done();		
 		});
 	});
 
@@ -78,12 +70,8 @@ describe('pubsubhubbub notification', function () {
 			body: response_body + "potentially malicious content"
 		}
 		request.post(options, function (err, res, body) {
-			try {
-				expect(res.statusCode).to.equal(202);
-				done();
-			} catch (err) {
-				done(err);
-			}
+			expect(res.statusCode).to.equal(202);
+			done();
 		});
 	});
 
@@ -97,12 +85,8 @@ describe('pubsubhubbub notification', function () {
 			body: response_body
 		}
 		request.post(options, function (err, res, body) {
-			try {
-				expect(res.statusCode).to.equal(204);
-				done();
-			} catch (err) {
-				done(err);
-			}
+			expect(res.statusCode).to.equal(204);
+			done();
 		});
 	});
 
@@ -121,14 +105,11 @@ describe('pubsubhubbub notification', function () {
 		pubsub.on('feed', function () {
 			eventFired = true;
 		});
-		try {
-			setTimeout( function () {
-				expect(eventFired).to.equal(true);
-				done();
-			}, 100);	
-		} catch (err) {
-			done(err);
-		}
+
+		setTimeout(function(){
+			expect(eventFired).to.equal(true);
+			done();
+		}, 10);
 	});
 
 	it('should not emit a feed event - signature does not match', function (done) {
@@ -146,14 +127,11 @@ describe('pubsubhubbub notification', function () {
 		pubsub.on('feed', function () {
 			eventFired = true;
 		});
-		try {
-			setTimeout( function () {
-				expect(eventFired).to.equal(false);
-				done();
-			}, 100);	
-		} catch (err) {
-			done(err);
-		}
+
+		setTimeout( function() {
+			expect(eventFired).to.equal(false);
+			done();
+		}, 10);
 	});
 
 	after(function () {
