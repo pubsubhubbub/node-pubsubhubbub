@@ -34,23 +34,6 @@ describe('pubsubhubbub notification', function () {
 		pubsub.listen(8000);
 	});
 
-	it('should return 403 - no X-Hub-Signature', function (done){
-		var options = {
-			url: 'http://localhost:8000',
-			headers: {
-				'link': '<http://test.com>; rel="self", <http://pubsubhubbub.appspot.com/>; rel="hub"',
-			}
-		}
-		request.post(options, function (err, res, body) {
-			try{
-				expect(res.statusCode).to.equal(403);
-				done();	
-			} catch (err) {
-				done(err);
-			}	
-		});
-	});
-
 	it('should return 400 - no topic', function (done) {
 		var options = {
 			url: 'http://localhost:8000',
@@ -68,7 +51,43 @@ describe('pubsubhubbub notification', function () {
 		});
 	});
 
-	it('should return 204', function (done) {
+	it('should return 403 - no X-Hub-Signature', function (done){
+		var options = {
+			url: 'http://localhost:8000',
+			headers: {
+				'link': '<http://test.com>; rel="self", <http://pubsubhubbub.appspot.com/>; rel="hub"',
+			}
+		}
+		request.post(options, function (err, res, body) {
+			try{
+				expect(res.statusCode).to.equal(403);
+				done();	
+			} catch (err) {
+				done(err);
+			}	
+		});
+	});
+
+	it('should return 202 - signature does not match', function (done) {
+		var options = {
+			url: 'http://localhost:8000',
+			headers: {
+				'X-Hub-Signature': 'sha1='+hub_encryption,
+				'link': '<http://test.com>; rel="self", <http://pubsubhubbub.appspot.com/>; rel="hub"',
+			},
+			body: response_body + "potentially malicious content"
+		}
+		request.post(options, function (err, res, body) {
+			try {
+				expect(res.statusCode).to.equal(202);
+				done();
+			} catch (err) {
+				done(err);
+			}
+		});
+	});
+
+	it('should return 204 - sucessful request', function (done) {
 		var options = {
 			url: 'http://localhost:8000',
 			headers: {
@@ -87,12 +106,62 @@ describe('pubsubhubbub notification', function () {
 		});
 	});
 
+	it('should emit a feed event - successful request', function (done) {
+		var eventFired = false;
+		var options = {
+			url: 'http://localhost:8000',
+			headers: {
+				'X-Hub-Signature': 'sha1='+hub_encryption,
+				'link': '<http://test.com>; rel="self", <http://pubsubhubbub.appspot.com/>; rel="hub"',
+			},
+			body: response_body
+		}
+		request.post(options, function (err, res, body) {});
+
+		pubsub.on('feed', function () {
+			eventFired = true;
+		});
+		try {
+			setTimeout( function () {
+				expect(eventFired).to.equal(true);
+				done();
+			}, 100);	
+		} catch (err) {
+			done(err);
+		}
+	});
+
+	it('should not emit a feed event - signature does not match', function (done) {
+		var eventFired = false;
+		var options = {
+			url: 'http://localhost:8000',
+			headers: {
+				'X-Hub-Signature': 'sha1='+hub_encryption,
+				'link': '<http://test.com>; rel="self", <http://pubsubhubbub.appspot.com/>; rel="hub"',
+			},
+			body: response_body + "potentially malicious content"
+		}
+		request.post(options, function (err, res, body) {});
+
+		pubsub.on('feed', function () {
+			eventFired = true;
+		});
+		try {
+			setTimeout( function () {
+				expect(eventFired).to.equal(false);
+				done();
+			}, 100);	
+		} catch (err) {
+			done(err);
+		}
+	});
+
 	after(function () {
 		pubsub.server.close();
 	});
 });
 
-suite("Pubsubhubbub tests", function () {
+suite("pubsubhubbub creation", function () {
 	test("pubsub should exist", function () {
 		expect(pubsub).to.exist;
 	});
