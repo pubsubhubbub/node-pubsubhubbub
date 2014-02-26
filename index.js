@@ -16,6 +16,8 @@ var request = require("request"),
  * @param {String} [options.callbackUrl] Callback URL for the hub
  * @param {String} [options.secret] Secret value for HMAC signatures
  * @param {Number} [options.maxContentSize] Maximum allowed size of the POST messages
+ * @param {String} [options.username] Username for HTTP Authentication
+ * @param {String} [options.password] Password for HTTP Authentication
  * @return {Object} A PubSubHubbub server object
  */
 module.exports.createServer = function(options){
@@ -197,7 +199,7 @@ PubSubHubbub.prototype._onError = function(error){
 }
 
 /**
- * Will be fired when HTTP server has successfully started listening the selected port
+ * Will be fired when HTTP server has successfully started listening on the selected port
  *
  * @event
  */
@@ -279,6 +281,7 @@ PubSubHubbub.prototype._onPostRequest = function(req, res){
         return this._sendError(req, res, 400, "Bad Request");
     }
 
+    // Hub must notify with signature header if secret specified.
     if(this.secret && !req.headers['x-hub-signature']){
         return this._sendError(req, res, 403, "Forbidden");
     }
@@ -318,8 +321,10 @@ PubSubHubbub.prototype._onPostRequest = function(req, res){
             return this._sendError(req, res, 413, "Request Entity Too Large");
         }
 
+        // Must return 2xx code even if signature doesn't match.
         if(this.secret && hmac.digest("hex").toLowerCase() != signature){
-            return this._sendError(req, res, 403, "Forbidden");
+            res.writeHead(202, {'Content-Type': 'text/plain; charset=utf-8'});
+            return res.end();
         }
 
         res.writeHead(204, {'Content-Type': 'text/plain; charset=utf-8'});
@@ -345,7 +350,7 @@ PubSubHubbub.prototype._onPostRequest = function(req, res){
  * @param {String} message Error message to display
  */
 PubSubHubbub.prototype._sendError = function(req, res, code, message){
-    res.writeHead(500, {"Content-Type": "text/html"});
+    res.writeHead(code, {"Content-Type": "text/html"});
     res.end("<!DOCTYPE html>\n"+
             "<html>\n"+
             "    <head>\n"+
